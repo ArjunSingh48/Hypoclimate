@@ -99,18 +99,29 @@ flowchart LR
 
 | Part | File | Talks to | Job |
 |---|---|---|---|
-| Screens | `app.py` | engine, portfolio, report, maps | Address check · Bank portfolio · Method & data · Tests |
-| Web API | `api.py` | engine | `GET /score` for brokers, platforms or another front end |
-| Command line | `batch.py`, `disaster_test.py` | engine | Score a CSV of addresses; check real disaster places |
-| Engine | `engine.py` | geoadmin, config, example data | Step 1 collects facts, step 2 turns them into scores and CHF figures |
-| Rules | `config.py` | – | Every threshold and CHF assumption, in one place |
-| API client | `geoadmin.py` | geo.admin.ch | Address search, hazard layers, building register, solar roofs |
-| Portfolio | `portfolio.py` | engine | Scores a whole mortgage book and sums it up |
-| Reports | `report.py` | – | Printable advisor report and portfolio report |
-| Maps | `maps.py` | swisstopo tiles in the browser | Map with switchable federal hazard layers |
-| Example data | `example_data.py`, `example_portfolio.py` | – | Offline demo; the example mortgage book is invented |
+| Screens | `frontend/app.py` | engine, portfolio, report, maps | Address check · Bank portfolio · Method & data · Tests |
+| Web API | `backend/api.py` | engine | `GET /score` for brokers, platforms or another front end |
+| Command line | `backend/batch.py`, `backend/disaster_test.py` | engine | Score a CSV of addresses; check real disaster places |
+| Engine | `backend/engine.py` | geoadmin, config, example data | Step 1 collects facts, step 2 turns them into scores and CHF figures |
+| Rules | `backend/config.py` | – | Every threshold and CHF assumption, in one place |
+| API client | `backend/geoadmin.py` | geo.admin.ch | Address search, hazard layers, building register, solar roofs |
+| Portfolio | `backend/portfolio.py` | engine | Scores a whole mortgage book and sums it up |
+| Reports | `backend/report.py` | – | Printable advisor report and portfolio report |
+| Maps | `frontend/maps.py` | swisstopo tiles in the browser | Map with switchable federal hazard layers |
+| Example data | `backend/example_data.py`, `backend/example_portfolio.py` | – | Offline demo; the example mortgage book is invented |
 
 </details>
+
+### 📁 Folders
+
+| Folder | Branch | What is inside |
+|---|---|---|
+| `backend/` | `backend` | All logic: federal API client, scoring engine, rules, portfolio, reports, web API, batch and disaster test |
+| `frontend/` | `frontend` | Streamlit screens and maps; they only **call** the backend |
+| `data/` | `backend` | Two small input files: a sample address list and the disaster-test list |
+| `tests/` | both | Automatic tests |
+
+There is **no database**: every check asks geo.admin.ch live, and nothing about a client is stored.
 
 ### 🔄 What happens when an advisor checks an address
 
@@ -176,20 +187,21 @@ All data is official, free and covers all of Switzerland (geo.admin.ch, open gov
 
 ## 🚧 Build plan
 
-| Step | What is added | Status |
-|---|---|---|
-| 1 | Architecture, rules and assumptions (`config.py`) | ✅ done |
-| 2 | Federal geodata API client | ✅ done |
-| 3 | Scoring engine with example data | ⏳ next |
-| 4 | Batch scoring and technical test | planned |
-| 5 | Web API for front ends | planned |
-| 6 | Maps with swisstopo and hazard layers | planned |
-| 7 | Printable advisor report | planned |
-| 8 | Mortgage-book scoring and portfolio report | planned |
-| 9 | Disaster test | planned |
-| 10 | Prototype screens | planned |
+| Step | What is added | Branch | Status |
+|---|---|---|---|
+| 1 | Architecture, rules and assumptions (`backend/config.py`) | `backend` | ✅ done |
+| 2 | Federal geodata API client | `backend` | ✅ done |
+| 3 | Scoring engine with example data | `backend` | ✅ done |
+| 4 | Batch scoring and technical test | `backend` | ✅ done |
+| 5 | Web API for front ends | `backend` | ✅ done |
+| 6 | Printable advisor report | `backend` | ✅ done |
+| 7 | Mortgage-book scoring and portfolio report | `backend` | ✅ done |
+| 8 | Disaster test | `backend` | ✅ done |
+| 9 | Maps with swisstopo and hazard layers | `frontend` | ⏳ next |
+| 10 | Prototype screens | `frontend` | planned |
 
-Install (on your laptop, in this folder): `pip install -r requirements.txt`
+Install (on your laptop, in this folder): `pip install -r requirements.txt`  
+Run the tests: `python -m pytest -q`
 
 <a id="team"></a>
 

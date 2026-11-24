@@ -1,0 +1,3 @@
+address,event,hazard,expected
+"Gerberngasse 20, 3011 Bern","Aare flood, Matte quarter, 2005",river_flood_100,flagged
+"Zürichbergstrasse 221, Zürich","Control: hillside, no known disaster",river_flood_100,clean
