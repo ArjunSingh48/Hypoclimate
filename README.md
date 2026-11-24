@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="#about">About</a> &nbsp;·&nbsp; <a href="#architecture">Architecture</a> &nbsp;·&nbsp; <a href="#data">Data</a> &nbsp;·&nbsp; <a href="#screens">Screens</a> &nbsp;·&nbsp; <a href="#build-plan">Build plan</a>
+  <a href="#quick-start">Quick start</a> &nbsp;·&nbsp; <a href="#architecture">Architecture</a> &nbsp;·&nbsp; <a href="#data">Data</a> &nbsp;·&nbsp; <a href="#screens">Screens</a> &nbsp;·&nbsp; <a href="#cli">CLI</a> &nbsp;·&nbsp; <a href="#configuration">Configuration</a> &nbsp;·&nbsp; <a href="#tests">Tests</a>
 </p>
 
 ---
@@ -183,25 +183,140 @@ All data is official, free and covers all of Switzerland (geo.admin.ch, open gov
 | **Method & data** | Everyone, incl. FINMA | Every source and every assumption |
 | **Tests** | Project team | Disaster test on real disaster places |
 
-<a id="build-plan"></a>
+<a id="quick-start"></a>
 
-## 🚧 Build plan
+## ⚡ Quick start
 
-| Step | What is added | Branch | Status |
-|---|---|---|---|
-| 1 | Architecture, rules and assumptions (`backend/config.py`) | `backend` | ✅ done |
-| 2 | Federal geodata API client | `backend` | ✅ done |
-| 3 | Scoring engine with example data | `backend` | ✅ done |
-| 4 | Batch scoring and technical test | `backend` | ✅ done |
-| 5 | Web API for front ends | `backend` | ✅ done |
-| 6 | Printable advisor report | `backend` | ✅ done |
-| 7 | Mortgage-book scoring and portfolio report | `backend` | ✅ done |
-| 8 | Disaster test | `backend` | ✅ done |
-| 9 | Maps with swisstopo and hazard layers | `frontend` | ⏳ next |
-| 10 | Prototype screens | `frontend` | planned |
+All commands run in a terminal on your laptop, inside the `hypoclimate` folder.
 
-Install (on your laptop, in this folder): `pip install -r requirements.txt`  
-Run the tests: `python -m pytest -q`
+```bash
+# 1 · install once
+pip install -r requirements.txt
+
+# 2 · start the prototype (opens in the browser)
+streamlit run frontend/app.py
+```
+
+> [!TIP]
+> In the app, choose **live** to query any Swiss address, or **example** to run offline with Gerberngasse 20, 3011 Bern and Zürichbergstrasse 221, Zürich.
+
+<p align="center">
+  <img src="screenshots/1_address_check.png" width="100%" alt="Address check screen">
+</p>
+
+<details>
+<summary><b>More screenshots</b></summary>
+
+| Bank portfolio | Advisor report |
+|---|---|
+| <img src="screenshots/2_bank_portfolio.png" alt="Bank portfolio"> | <img src="screenshots/5_advisor_report.png" alt="Advisor report"> |
+| **Method & data** | **Tests** |
+| <img src="screenshots/3_method_and_data.png" alt="Method and data"> | <img src="screenshots/4_tests.png" alt="Tests"> |
+
+</details>
+
+<a id="cli"></a>
+
+## ⌨️ CLI commands
+
+| Command | What it does |
+|---|---|
+| `streamlit run frontend/app.py` | Start the prototype screens |
+| `python -m backend.batch my_addresses.csv results.csv` | Score a CSV (`address, property_value, mortgage`); prints coverage and speed |
+| `python -m backend.disaster_test data/disaster_tests.csv` | Check that real disaster places are flagged |
+| `uvicorn backend.api:app --reload` | Start the web API; docs at http://127.0.0.1:8000/docs |
+| `python -m pytest -q` | Run the automatic tests |
+
+Add `--mode example` to the batch run or the disaster test to run offline.
+
+<a id="configuration"></a>
+
+## ⚙️ Configuration
+
+Every rule and CHF assumption lives in **`backend/config.py`**, so the scoring can be changed without touching the code.
+
+| Rule | Value |
+|---|---|
+| Value discount in 100-year flood area | 2–5% |
+| CO₂ factor, natural gas / heating oil | 0.198 / 0.265 kg/kWh |
+| CO₂ levy on heating fuels | CHF 120 per tonne |
+| Heat pump cost per flat | CHF 12'000–18'000 |
+| Solar income | CHF 0.10 per kWh |
+| Heavy-rain intensity per °C warming | about +7% |
+| Hail levels (50-yr stone size) | < 3 cm low · 3–5 cm medium · ≥ 5 cm high |
+| Storm levels (50-yr gusts) | < 100 low · 100–140 medium · ≥ 140 km/h high |
+| Physical score (1–5) | worst hazard (low 1, medium 3, high 4), +1 if two perils are high |
+| Transition score (1–5) | oil 4 · gas 3 · electric 3 · wood 2 · district heating 2 · heat pump 1; +1 if built before 1946 |
+
+<details>
+<summary><b>The one JSON answer</b></summary>
+
+Every screen and the API use the same answer from `engine.score(address, value, mortgage)`:
+
+```
+address, egid, lv95, wgs84,
+hazards   { level, finding, source }   per hazard
+building  { period, floors, flats, energy_source }
+energy    { heat_demand_kwh, roof_class, solar_kwh }
+scores    { physical, transition, main_drivers }
+chf       { value_discount, ltv_today_pct, ltv_after_pct, co2_levy_per_year,
+            heat_pump_cost, solar_income_per_year }
+trend_50y, summary, meta { queried_at, mode, assumptions_version, errors }
+```
+
+</details>
+
+<a id="tests"></a>
+
+## 🧪 Tests
+
+`python -m pytest -q` runs 11 automatic tests. They check, among other things, that the Bern example gives exactly the figures from our mockup, that one failing data source does not break the rest, and that the reports and the portfolio summary are built correctly.
+
+The **disaster test** (`data/disaster_tests.csv`) checks real places: the Matte quarter in Bern (Aare flood 2005) must be flagged, a hillside control address must come back clean.
+
+<a id="limits"></a>
+
+## ⚠️ Limits
+
+- Federal flood maps are indicative and ignore flood protection; the binding hazard maps are cantonal.
+- The runoff layer shows only "in zone or not", not flow depth.
+- There is no free property-value data, so the user enters the value.
+- The 50-year trend is a simple rule (+7% heavy-rain intensity per °C), not yet the CH2025 dataset.
+- The bank portfolio's example book is invented and marked as such everywhere.
+- CHF figures are illustrative estimates. **Information, not advice.**
+
+<details>
+<summary><b>Project structure</b></summary>
+
+```
+hypoclimate/
+  backend/                  # branch: backend
+    config.py               # every rule and CHF assumption
+    geoadmin.py             # federal geodata API client
+    engine.py               # collect -> evaluate -> one JSON answer
+    example_data.py         # offline example (Gerberngasse 20, Bern)
+    batch.py                # score a CSV; coverage and speed
+    api.py                  # web API (GET /score)
+    report.py               # advisor and portfolio reports (HTML, print to PDF)
+    portfolio.py            # mortgage-book scoring and summary
+    example_portfolio.py    # invented example mortgage book
+    disaster_test.py        # check real disaster places
+  frontend/                 # branch: frontend
+    maps.py                 # swisstopo map with hazard layers
+    app.py                  # Streamlit screens
+  data/
+    sample_portfolio.csv
+    disaster_tests.csv
+  tests/                    # automatic tests
+  screenshots/
+```
+</details>
+
+<a id="credits"></a>
+
+## 🙏 Data
+
+Built on open government data from [geo.admin.ch](https://www.geo.admin.ch): swisstopo, the Federal Office for the Environment (FOEN), MeteoSwiss, the Federal Statistical Office (FSO) and the Swiss Federal Office of Energy (SFOE).
 
 <a id="team"></a>
 
