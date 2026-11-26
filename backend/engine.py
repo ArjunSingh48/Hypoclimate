@@ -15,8 +15,8 @@ from . import config
 from . import example_data
 from . import geoadmin
 
-HAIL_KEYS = ["korngroesse", "hagel", "hailsize", "value", "wert", "label", "name"]
-STORM_KEYS = ["boeenspitze", "gust", "value", "wert", "speed", "label", "name"]
+HAIL_KEYS = ["value_0.name"]          # WMS answer, e.g. value_0.name = '4' (cm)
+STORM_KEYS = ["boenspitzen_kmh_50"]   # e.g. "130 ± 21 km/h"
 ZONE_HAZARDS = list(config.ZONE_LEVEL_IF_INSIDE)
 
 
@@ -35,19 +35,26 @@ def collect(address: str, mode: str = "live") -> dict:
 
 
 def _collect_live(address: str) -> dict:
-    loc = geoadmin.geocode(address)
+    errors: dict[str, str] = {}
+    try:
+        loc = geoadmin.geocode(address)
+    except Exception as exc:
+        raise LookupError(f"Address search failed for '{address}': {str(exc)[:150]}") from exc
     if loc is None:
-        raise LookupError(f"Address not found: {address}")
+        raise LookupError(f"Address not found in Switzerland: {address}")
     e, n = loc["e"], loc["n"]
-    raw: dict = {}
+    raw: dict = {"location": loc}
 
     # Ask for each layer separately: one bad layer must not break the others.
     by_layer: dict[str, list] = {}
-    errors: dict[str, str] = {}
 
     def ask(layer):
         try:
-            return layer, geoadmin.identify(e, n, [layer]), None
+            if layer in config.WMS_ONLY_LAYERS:
+                hits = [{"attributes": a} for a in geoadmin.wms_feature_info(e, n, layer)]
+            else:
+                hits = geoadmin.identify(e, n, [layer])
+            return layer, hits, None
         except Exception as exc:
             return layer, [], str(exc)[:150]
 
@@ -72,60 +79,143 @@ def _collect_live(address: str) -> dict:
                     break
             hazards[key] = {"value": value}
 
-    building = {}
-    if loc["feature_id"]:
-        try:
-            attrs = geoadmin.building(loc["feature_id"]) or {}
-        except Exception as exc:
-            attrs, errors["building register"] = {}, str(exc)[:150]
-        raw["building"] = attrs
-        building = _read_building(attrs) if attrs else {}
-
+    building, egid = {}, loc["egid"]
+    attrs = {}
     try:
-        roofs = geoadmin.solar(e, n)
+        if loc["feature_id"]:
+            attrs = geoadmin.building(loc["feature_id"]) or {}
+        if not attrs:  # no building id from the address search: find the building at the point
+            number = geoadmin.parse_address(address)["number"]
+            attrs = geoadmin.building_near(e, n, number) or {}
+            egid = egid or _int(attrs.get("egid"))
+    except Exception as exc:
+        errors["building register"] = str(exc)[:150]
+    raw["building"] = attrs
+    building = _read_building(attrs) if attrs else {}
+
+    # Solar roofs: first every roof linked to this building's EGID; only if there is none,
+    # the roof at the address point (and then say whose roof that is).
+    roofs, roof_owner = [], None
+    try:
+        if egid:
+            roofs = geoadmin.solar_by_egid(egid)
+        if not roofs:
+            roofs = geoadmin.solar(e, n) or geoadmin.solar(e, n, tolerance_px=10)
+            other = {_int((r.get("attributes") or {}).get("gwr_egid")) for r in roofs} - {None, egid}
+            if other:
+                oid = sorted(other)[0]
+                try:
+                    o = geoadmin.building_by_egid(oid)
+                except Exception:
+                    o = None
+                roof_owner = {"egid": oid, "label": (o or {}).get("strname_deinr"),
+                              "in_register": o is not None}
     except Exception as exc:
         roofs, errors["solar roofs"] = [], str(exc)[:150]
     raw["solar"] = [r.get("attributes") or {} for r in roofs]
-    energy = _read_solar(raw["solar"], loc["egid"])
+    energy = _read_solar(raw["solar"], egid, roof_owner)
 
     return {
-        "address": loc["label"], "egid": loc["egid"], "lv95": {"e": e, "n": n},
+        "address": loc["label"], "egid": egid, "lv95": {"e": e, "n": n},
         "hazards": hazards, "building": building, "energy": energy,
         "queried_at": date.today().isoformat(), "mode": "live", "raw": raw,
-        "errors": errors,
+        "errors": errors, "warnings": _plausibility(hazards, building, energy, loc),
+        "address_source": loc.get("source"), "match_note": loc.get("match_note"),
     }
+
+
+def _plausibility(hazards: dict, b: dict, en: dict, loc: dict) -> list[str]:
+    """Flag values that cannot be right or that come from somewhere else, so nothing passes silently."""
+    w = []
+    if loc.get("match_note") and loc["match_note"] != "exact house number":
+        w.append(loc["match_note"])
+    hail = hazards.get("hail_50y", {}).get("value")
+    if hail is not None and not 0 < hail <= 15:
+        w.append(f"hail value {hail} cm is outside 0-15 cm")
+    storm = hazards.get("storm_50y", {}).get("value")
+    if storm is not None and not 40 <= storm <= 300:
+        w.append(f"storm value {storm} km/h is outside 40-300 km/h")
+    year = b.get("period_end_year")
+    if year is not None and not 1000 <= year <= date.today().year + 1:
+        w.append(f"construction year {year} is not plausible")
+    if b and b.get("energy_source") is None:
+        w.append(f"the building register has no heating entry for this building "
+                 f"({b.get('category') or 'category unknown'}); transition score not calculated")
+    heat, area, flats = en.get("heat_demand_kwh"), b.get("energy_area_m2"), b.get("flats")
+    if heat and area and heat / area > 400:
+        w.append(f"heat demand {heat:,.0f} kWh/yr on {area} m² heated area looks too high")
+    elif heat and not area and flats and b.get("category") == "residential only" \
+            and heat / flats > 40_000:
+        w.append(f"heat demand {heat:,.0f} kWh/yr for {flats} flat(s) looks too high")
+    owner = en.get("roof_owner")
+    if owner:
+        who = f"{owner['label']} (EGID {owner['egid']})" if owner.get("label") else \
+            f"EGID {owner['egid']}, which is no longer in the building register"
+        used = "its solar potential is shown, its heat demand is not used" if owner.get("in_register") \
+            else "no solar or heat figures are shown"
+        w.append(f"the solar register has no roof for this building; the roof at this address "
+                 f"belongs to {who}; {used}")
+    if b.get("energy_source") in ("oil", "gas") and b.get("category") \
+            and b["category"] not in config.HEAT_PUMP_COST_CATEGORIES:
+        w.append(f"heat pump cost is estimated per flat, which does not fit a "
+                 f"{b['category']} building; not calculated")
+    if en.get("building_parts", 0) > 1:
+        w.append(f"the solar register splits this building into {en['building_parts']} parts; "
+                 f"heat demand is the main part's ({en['heat_demand_kwh']:,.0f} kWh/yr), "
+                 f"all parts together {en['heat_demand_all_parts_kwh']:,.0f} kWh/yr")
+    return w
 
 
 def _read_building(a: dict) -> dict:
     period = config.GWR_PERIOD.get(_int(a.get("gbaup")))
     year = _int(a.get("gbauj"))
+    code = _int(a.get("genh1"))
     return {
         "period_label": str(year) if year else (period[0] if period else None),
         "period_end_year": year or (period[1] if period else None),
         "floors": _int(a.get("gastw")),
         "flats": _int(a.get("ganzwhg")),
         "footprint_m2": _int(a.get("garea")),
-        "energy_source": config.GWR_ENERGY_SOURCE.get(_int(a.get("genh1")), "unknown"),
+        "energy_area_m2": _int(a.get("gebf")),
+        "category": config.GWR_CATEGORY.get(_int(a.get("gkat"))),
+        "name": a.get("gbez") or None,
+        # no heating entry in the register -> None (no score), never a guessed value
+        "energy_source": config.GWR_ENERGY_SOURCE.get(code, "unknown") if code else None,
     }
 
 
-def _read_solar(roofs: list[dict], egid: int | None) -> dict:
+def _read_solar(roofs: list[dict], egid: int | None, roof_owner: dict | None = None) -> dict:
     if not roofs:
         return {}
-    if egid is not None:
-        mine = [r for r in roofs if _int(r.get("gwr_egid") or r.get("egid")) == egid]
-        roofs = mine or roofs
-    best = max(roofs, key=lambda r: (_int(r.get("klasse")) or 0,
-                                     geoadmin.first_number(r, ["stromertrag"]) or 0))
-    heat = next((v for r in roofs if (v := geoadmin.first_number(
-        r, ["bedarf_heizung", "heizwaermebedarf"])) is not None), None)
-    water = next((v for r in roofs if (v := geoadmin.first_number(
-        r, ["bedarf_warmwasser"])) is not None), None)
+    num = geoadmin.first_number
+    if roof_owner and not roof_owner.get("in_register"):
+        # the roof at the point belongs to a building that no longer exists (replaced):
+        # its old roof data says nothing about the building standing there now
+        return {"roofs": 0, "matched_building": False, "roof_owner": roof_owner}
+    mine = [r for r in roofs if egid is not None and _int(r.get("gwr_egid") or r.get("egid")) == egid]
+    matched = bool(mine)
+    roofs = mine or roofs
+    best = max(roofs, key=lambda r: (_int(r.get("klasse")) or 0, num(r, ["stromertrag"]) or 0))
+    # Heat demand is given per building part (building_id), repeated on each of its roofs.
+    parts: dict = {}
+    for r in roofs:
+        p = parts.setdefault(r.get("building_id", "one part"), {"area": 0.0, "heat": None, "water": None})
+        p["area"] += num(r, ["flaeche"]) or 0
+        p["heat"] = p["heat"] if p["heat"] is not None else num(r, ["bedarf_heizung", "heizwaermebedarf"])
+        p["water"] = p["water"] if p["water"] is not None else num(r, ["bedarf_warmwasser"])
+    main = max(parts.values(), key=lambda p: p["area"])
+    heat_all = sum(p["heat"] or 0 for p in parts.values())
     return {
-        "heat_demand_kwh": heat, "hot_water_kwh": water,
-        "roof_area_m2": geoadmin.first_number(best, ["flaeche"]),
+        # the heat demand of another building is never used for this one
+        "heat_demand_kwh": main["heat"] if matched else None,
+        "heat_demand_all_parts_kwh": heat_all if matched else None,
+        "hot_water_kwh": main["water"] if matched else None,
+        "building_parts": len(parts) if matched else 0,
+        "roof_area_m2": num(best, ["flaeche"]),
         "roof_class": config.SOLAR_CLASS.get(_int(best.get("klasse"))),
-        "solar_kwh": geoadmin.first_number(best, ["stromertrag"]),
+        "solar_kwh": num(best, ["stromertrag"]),
+        "solar_kwh_all_roofs": sum(num(r, ["stromertrag"]) or 0 for r in roofs),
+        "roofs": len(roofs), "matched_building": matched, "roof_owner": roof_owner,
     }
 
 
@@ -217,7 +307,9 @@ def evaluate(facts: dict, property_value: float | None = None,
         "meta": {"queried_at": facts.get("queried_at"), "mode": facts.get("mode"),
                  "assumptions_version": config.ASSUMPTIONS_VERSION,
                  "note": "Information, not advice. Federal flood maps are indicative.",
-                 "errors": facts.get("errors", {})},
+                 "errors": facts.get("errors", {}), "warnings": facts.get("warnings", []),
+                 "address_source": facts.get("address_source"),
+                 "match_note": facts.get("match_note")},
     }
 
 
@@ -239,7 +331,7 @@ def _chf(hazards, b, en, value, mortgage) -> dict:
         t = heat * config.CO2_KG_PER_KWH[src] / 1000
         out["co2_t_per_year"] = round(t, 1)
         out["co2_levy_per_year"] = round(t * config.CO2_LEVY_CHF_PER_T)
-    if src in ("oil", "gas") and b.get("flats"):
+    if src in ("oil", "gas") and b.get("flats") and b.get("category") in config.HEAT_PUMP_COST_CATEGORIES:
         lo, hi = config.HEAT_PUMP_CHF_PER_FLAT
         out["heat_pump_cost"] = [b["flats"] * lo, b["flats"] * hi]
     if en.get("solar_kwh"):

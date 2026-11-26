@@ -139,13 +139,13 @@ sequenceDiagram
     G->>F: SearchServer (swisstopo)
     F-->>G: coordinates (LV95) + building ID (EGID)
     par 7 hazard layers, asked separately
-        G->>F: identify: flood 100 / 300+, runoff, hail, storm, rockfall, avalanche
+        G->>F: WMS GetFeatureInfo: flood 100 / 300+, runoff, hail, rockfall, avalanche · identify: storm
         F-->>G: inside zone? / value
     end
     G->>F: building register (EGID)
     F-->>G: age, floors, flats, heating
-    G->>F: solar roofs near the point
-    F-->>G: roof class, solar yield, heat demand
+    G->>F: find: all solar roofs of this EGID (roof at the point only if none)
+    F-->>G: roof class, solar yield, heat demand per building part
     E->>E: evaluate: scores 1-5 + CHF figures (rules in config.py)
     E-->>UI: one JSON answer
     UI-->>A: scores, map, CHF table, advisor report
@@ -191,7 +191,7 @@ All commands run in a terminal on your laptop, inside the `hypoclimate` folder.
 
 ```bash
 # 1 · install once
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 
 # 2 · start the prototype (opens in the browser)
 streamlit run frontend/app.py
@@ -222,10 +222,11 @@ streamlit run frontend/app.py
 | Command | What it does |
 |---|---|
 | `streamlit run frontend/app.py` | Start the prototype screens |
-| `python -m backend.batch my_addresses.csv results.csv` | Score a CSV (`address, property_value, mortgage`); prints coverage and speed |
-| `python -m backend.disaster_test data/disaster_tests.csv` | Check that real disaster places are flagged |
+| `python3 -m backend.batch my_addresses.csv results.csv` | Score a CSV (`address, property_value, mortgage`); prints coverage and speed |
+| `python3 -m backend.disaster_test data/disaster_tests.csv` | Check that real disaster places are flagged |
+| `python3 -m backend.live_check data/test_addresses.csv` | Live check: real federal data for a list of addresses, with every hazard, the building, warnings and errors; saves a report to `data/live_runs/` |
 | `uvicorn backend.api:app --reload` | Start the web API; docs at http://127.0.0.1:8000/docs |
-| `python -m pytest -q` | Run the automatic tests |
+| `python3 -m pytest -q` | Run the automatic tests |
 
 Add `--mode example` to the batch run or the disaster test to run offline.
 
@@ -270,7 +271,7 @@ trend_50y, summary, meta { queried_at, mode, assumptions_version, errors }
 
 ## 🧪 Tests
 
-`python -m pytest -q` runs 11 automatic tests. They check, among other things, that the Bern example gives exactly the figures from our mockup, that one failing data source does not break the rest, and that the reports and the portfolio summary are built correctly.
+`python3 -m pytest -q` runs 38 automatic tests. 16 of them replay the real answers the federal services gave on 26.11.2026 for 8 addresses across 5 cantons (`tests/fixtures/`), so the address matching, the building and roof matching and the scores are checked against real data, not invented data. Tests never use the internet. They also check that the Bern example gives exactly the figures from our mockup, that one failing data source does not break the rest, and that the reports and the portfolio summary are built correctly.
 
 The **disaster test** (`data/disaster_tests.csv`) checks real places: the Matte quarter in Bern (Aare flood 2005) must be flagged, a hillside control address must come back clean.
 

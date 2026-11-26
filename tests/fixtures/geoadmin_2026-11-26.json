@@ -1,0 +1,884 @@
+{
+ "recorded": "2026-11-26, live from api3.geo.admin.ch and wms.geo.admin.ch (browser run)",
+ "search": {
+  "Sihlmatten 7, 8134 adliswil": [
+   {
+    "label": "Sihlmatten 7 <b>8134 Adliswil</b>",
+    "detail": "sihlmatten 7 8134 adliswil 131 adliswil ch zh",
+    "featureId": "52947_0",
+    "x": 1239689.125,
+    "y": 2682407.25
+   }
+  ],
+  "Uetlibergstrasse 111b": [
+   {
+    "label": "Uetlibergstrasse 111b <b>8045 Zürich</b>",
+    "detail": "uetlibergstrasse 111b 8045 zuerich 261 zuerich ch zh",
+    "featureId": "302063214_0",
+    "x": 1246088.875,
+    "y": 2681551.5
+   }
+  ],
+  "Uetlibergstrasse 111b, 8045 Zürich": [
+   {
+    "label": "Uetlibergstrasse 111b <b>8045 Zürich</b>",
+    "detail": "uetlibergstrasse 111b 8045 zuerich 261 zuerich ch zh",
+    "featureId": "302063214_0",
+    "x": 1246088.875,
+    "y": 2681551.5
+   }
+  ],
+  "St. Leodegarstrasse 6": [
+   {
+    "label": "Leodegarstrasse 6 <b>5524 Niederwil AG</b>",
+    "detail": "leodegarstrasse 6 5524 niederwil ag 4072 niederwil _ag_ ch ag",
+    "featureId": "2703633_0",
+    "x": 1248095.5,
+    "y": 2664658.75
+   },
+   {
+    "label": "Leodegarstrasse 6.1 <b>5524 Niederwil AG</b>",
+    "detail": "leodegarstrasse 6.1 5524 niederwil ag 4072 niederwil _ag_ ch ag",
+    "featureId": "263077276_0",
+    "x": 1248101.125,
+    "y": 2664657
+   }
+  ],
+  "Sankt-Leodegarstrasse 6": [
+   {
+    "label": "Leodegarstrasse 6 <b>5524 Niederwil AG</b>",
+    "detail": "leodegarstrasse 6 5524 niederwil ag 4072 niederwil _ag_ ch ag",
+    "featureId": "2703633_0",
+    "x": 1248095.5,
+    "y": 2664658.75
+   },
+   {
+    "label": "Leodegarstrasse 6.1 <b>5524 Niederwil AG</b>",
+    "detail": "leodegarstrasse 6.1 5524 niederwil ag 4072 niederwil _ag_ ch ag",
+    "featureId": "263077276_0",
+    "x": 1248101.125,
+    "y": 2664657
+   },
+   {
+    "label": "Sankt Jakob 1a <b>6461 Isenthal</b>",
+    "detail": "sankt jakob 1a 6461 isenthal 1211 isenthal ch ur",
+    "featureId": "191752003_0",
+    "x": 1195318,
+    "y": 2682523
+   }
+  ],
+  "St. Leodegar-Strasse 6": [
+   {
+    "label": "St.-Leodegar-Strasse 6 <b>6006 Luzern</b>",
+    "detail": "st.-leodegar-strasse 6 6006 luzern 1061 luzern ch lu",
+    "featureId": "211552_0",
+    "x": 1211948.875,
+    "y": 2666478.75
+   },
+   {
+    "label": "St.-Leodegar-Strasse 6a <b>6006 Luzern</b>",
+    "detail": "st.-leodegar-strasse 6a 6006 luzern 1061 luzern ch lu",
+    "featureId": "191731542_1",
+    "x": 1211927.375,
+    "y": 2666490.5
+   },
+   {
+    "label": "St.-Leodegar-Strasse 2 <b>6006 Luzern</b>",
+    "detail": "st.-leodegar-strasse 2 6006 luzern 1061 luzern ch lu",
+    "featureId": "211627_0",
+    "x": 1211921.25,
+    "y": 2666414.5
+   },
+   {
+    "label": "St.-Leodegar-Strasse 3 <b>6006 Luzern</b>",
+    "detail": "st.-leodegar-strasse 3 6006 luzern 1061 luzern ch lu",
+    "featureId": "211594_0",
+    "x": 1211938.625,
+    "y": 2666405.5
+   }
+  ],
+  "Sankt-Leodegar-Strasse 6": [
+   {
+    "label": "St.-Leodegar-Strasse 6 <b>6006 Luzern</b>",
+    "detail": "st.-leodegar-strasse 6 6006 luzern 1061 luzern ch lu",
+    "featureId": "211552_0",
+    "x": 1211948.875,
+    "y": 2666478.75
+   },
+   {
+    "label": "St.-Leodegar-Strasse 6a <b>6006 Luzern</b>",
+    "detail": "st.-leodegar-strasse 6a 6006 luzern 1061 luzern ch lu",
+    "featureId": "191731542_1",
+    "x": 1211927.375,
+    "y": 2666490.5
+   },
+   {
+    "label": "St.-Leodegar-Strasse 2 <b>6006 Luzern</b>",
+    "detail": "st.-leodegar-strasse 2 6006 luzern 1061 luzern ch lu",
+    "featureId": "211627_0",
+    "x": 1211921.25,
+    "y": 2666414.5
+   },
+   {
+    "label": "St.-Leodegar-Strasse 3 <b>6006 Luzern</b>",
+    "detail": "st.-leodegar-strasse 3 6006 luzern 1061 luzern ch lu",
+    "featureId": "211594_0",
+    "x": 1211938.625,
+    "y": 2666405.5
+   }
+  ],
+  "St. Leodegarstrasse 6, 6006 Luzern": [
+   {
+    "label": "St.-Leodegar-Strasse 6 <b>6006 Luzern</b>",
+    "detail": "st.-leodegar-strasse 6 6006 luzern 1061 luzern ch lu",
+    "featureId": "211552_0",
+    "x": 1211948.875,
+    "y": 2666478.75
+   },
+   {
+    "label": "Haldenstrasse 6.6 <b>6006 Luzern</b>",
+    "detail": "haldenstrasse 6.6 6006 luzern 1061 luzern ch lu",
+    "featureId": "191743019_0",
+    "x": 1211932,
+    "y": 2666812
+   },
+   {
+    "label": "St.-Leodegar-Strasse 2 <b>6006 Luzern</b>",
+    "detail": "st.-leodegar-strasse 2 6006 luzern 1061 luzern ch lu",
+    "featureId": "211627_0",
+    "x": 1211921.25,
+    "y": 2666414.5
+   },
+   {
+    "label": "St.-Leodegar-Strasse 3 <b>6006 Luzern</b>",
+    "detail": "st.-leodegar-strasse 3 6006 luzern 1061 luzern ch lu",
+    "featureId": "211594_0",
+    "x": 1211938.625,
+    "y": 2666405.5
+   }
+  ],
+  "Bielstrasse 3, 4500 Solothurn": [
+   {
+    "label": "Bielstrasse 3 <b>4500 Solothurn</b>",
+    "detail": "bielstrasse 3 4500 solothurn 2601 solothurn ch so",
+    "featureId": "1764933_0",
+    "x": 1228602.125,
+    "y": 2607171.25
+   }
+  ],
+  "Untertor 3, 4915 St. Urban": [
+   {
+    "label": "Untertor 3 <b>4915 St. Urban</b>",
+    "detail": "untertor 3 4915 st. urban 1139 pfaffnau ch lu",
+    "featureId": "184379_0",
+    "x": 1231409.375,
+    "y": 2630334.75
+   }
+  ],
+  "Rohrerstrasse 7": [
+   {
+    "label": "Rohrerstrasse 7 <b>5000 Aarau</b>",
+    "detail": "rohrerstrasse 7 5000 aarau 4001 aarau ch ag",
+    "featureId": "522994_0",
+    "x": 1249424.625,
+    "y": 2646621.75
+   },
+   {
+    "label": "Rohrerstrasse 7.1 <b>5000 Aarau</b>",
+    "detail": "rohrerstrasse 7.1 5000 aarau 4001 aarau ch ag",
+    "featureId": "263094055_0",
+    "x": 1249440.5,
+    "y": 2646596.75
+   },
+   {
+    "label": "Rohrerstrasse 76 <b>5000 Aarau</b>",
+    "detail": "rohrerstrasse 76 5000 aarau 4001 aarau ch ag",
+    "featureId": "263011255_0",
+    "x": 1249494.625,
+    "y": 2647032.5
+   },
+   {
+    "label": "Rohrerstrasse 80.7 <b>5000 Aarau</b>",
+    "detail": "rohrerstrasse 80.7 5000 aarau 4001 aarau ch ag",
+    "featureId": "263094065_0",
+    "x": 1249387.75,
+    "y": 2646885.5
+   }
+  ],
+  "Rohrerstrasse 7, 5000 Aarau": [
+   {
+    "label": "Rohrerstrasse 7 <b>5000 Aarau</b>",
+    "detail": "rohrerstrasse 7 5000 aarau 4001 aarau ch ag",
+    "featureId": "522994_0",
+    "x": 1249424.625,
+    "y": 2646621.75
+   },
+   {
+    "label": "Rohrerstrasse 7.1 <b>5000 Aarau</b>",
+    "detail": "rohrerstrasse 7.1 5000 aarau 4001 aarau ch ag",
+    "featureId": "263094055_0",
+    "x": 1249440.5,
+    "y": 2646596.75
+   },
+   {
+    "label": "Rohrerstrasse 80.7 <b>5000 Aarau</b>",
+    "detail": "rohrerstrasse 80.7 5000 aarau 4001 aarau ch ag",
+    "featureId": "263094065_0",
+    "x": 1249387.75,
+    "y": 2646885.5
+   }
+  ],
+  "Buschberghof 261, 5064 Wittnau": [
+   {
+    "label": "Buschberghof 261 <b>5064 Wittnau</b>",
+    "detail": "buschberghof 261 5064 wittnau 4181 wittnau ch ag",
+    "featureId": "190194511_0",
+    "x": 1259402,
+    "y": 2638494.25
+   },
+   {
+    "label": "Buschberghof 261.1 <b>5064 Wittnau</b>",
+    "detail": "buschberghof 261.1 5064 wittnau 4181 wittnau ch ag",
+    "featureId": "263072976_0",
+    "x": 1259416.25,
+    "y": 2638511.5
+   }
+  ],
+  "Gloriastrasse 32": [
+   {
+    "label": "Gloriastrasse 32 <b>8006 Zürich</b>",
+    "detail": "gloriastrasse 32 8006 zuerich 261 zuerich ch zh",
+    "featureId": "302066155_0",
+    "x": 1247923,
+    "y": 2684164.75
+   }
+  ],
+  "Gloriastrasse 32, 8006 Zürich": [
+   {
+    "label": "Gloriastrasse 32 <b>8006 Zürich</b>",
+    "detail": "gloriastrasse 32 8006 zuerich 261 zuerich ch zh",
+    "featureId": "302066155_0",
+    "x": 1247923,
+    "y": 2684164.75
+   }
+  ]
+ },
+ "buildings": {
+  "52947_0": {
+   "egid": "52947",
+   "gbauj": 1964,
+   "gbaup": 8014,
+   "gastw": 4,
+   "ganzwhg": 8,
+   "garea": 209,
+   "genh1": 7530,
+   "gkat": 1020,
+   "gebf": null,
+   "deinr": "7",
+   "strname_deinr": "Sihlmatten 7",
+   "gbez": ""
+  },
+  "302063214_0": {
+   "egid": "302063214",
+   "gbauj": 2018,
+   "gbaup": 8023,
+   "gastw": 10,
+   "ganzwhg": 229,
+   "garea": 1375,
+   "genh1": 7511,
+   "gkat": 1040,
+   "gebf": 11828,
+   "deinr": "111b",
+   "strname_deinr": "Uetlibergstrasse 111b",
+   "gbez": ""
+  },
+  "211552_0": {
+   "egid": "211552",
+   "gbauj": 1900,
+   "gbaup": 8011,
+   "gastw": 4,
+   "ganzwhg": 3,
+   "garea": 283,
+   "genh1": 7520,
+   "gkat": 1040,
+   "gebf": null,
+   "deinr": "6",
+   "strname_deinr": "St.-Leodegar-Strasse 6",
+   "gbez": ""
+  },
+  "1764933_0": {
+   "egid": "1764933",
+   "gbauj": 1961,
+   "gbaup": 8014,
+   "gastw": 6,
+   "ganzwhg": 1,
+   "garea": 383,
+   "genh1": 7520,
+   "gkat": 1040,
+   "gebf": 1770,
+   "deinr": "3",
+   "strname_deinr": "Bielstrasse 3",
+   "gbez": ""
+  },
+  "184379_0": {
+   "egid": "184379",
+   "gbauj": null,
+   "gbaup": 8011,
+   "gastw": 4,
+   "ganzwhg": 1,
+   "garea": 305,
+   "genh1": 7580,
+   "gkat": 1040,
+   "gebf": null,
+   "deinr": "3",
+   "strname_deinr": "Untertor 3",
+   "gbez": "Klostergasthaus Löwen"
+  },
+  "522994_0": {
+   "egid": "522994",
+   "gbauj": null,
+   "gbaup": null,
+   "gastw": null,
+   "ganzwhg": null,
+   "garea": 1553,
+   "genh1": null,
+   "gkat": 1060,
+   "gebf": null,
+   "deinr": "7",
+   "strname_deinr": "Rohrerstrasse 7",
+   "gbez": ""
+  },
+  "190194511_0": {
+   "egid": "190194511",
+   "gbauj": 1942,
+   "gbaup": 8012,
+   "gastw": 2,
+   "ganzwhg": 1,
+   "garea": 383,
+   "genh1": 7540,
+   "gkat": 1030,
+   "gebf": null,
+   "deinr": "261",
+   "strname_deinr": "Buschberghof 261",
+   "gbez": ""
+  },
+  "302066155_0": {
+   "egid": "302066155",
+   "gbauj": 2023,
+   "gbaup": 8023,
+   "gastw": 4,
+   "ganzwhg": null,
+   "garea": 809,
+   "genh1": 7580,
+   "gkat": 1060,
+   "gebf": 2314,
+   "deinr": "32",
+   "strname_deinr": "Gloriastrasse 32",
+   "gbez": ""
+  }
+ },
+ "other_buildings": {
+  "52945": {
+   "strname_deinr": "Sihlmatten 3",
+   "egid": "52945"
+  },
+  "587239": {
+   "strname_deinr": "Buschberghof 313",
+   "egid": "587239"
+  }
+ },
+ "solar_by_egid": {
+  "184379": [
+   {
+    "gwr_egid": 184379,
+    "building_id": 3405948,
+    "klasse": 3,
+    "flaeche": 9.3,
+    "stromertrag": 1551,
+    "bedarf_heizung": 14685,
+    "bedarf_warmwasser": 3840
+   },
+   {
+    "gwr_egid": 184379,
+    "building_id": 3405948,
+    "klasse": 3,
+    "flaeche": 31.8,
+    "stromertrag": 5394,
+    "bedarf_heizung": 14685,
+    "bedarf_warmwasser": 3840
+   },
+   {
+    "gwr_egid": 184379,
+    "building_id": 1744722,
+    "klasse": 4,
+    "flaeche": 116.8,
+    "stromertrag": 23126,
+    "bedarf_heizung": 93376,
+    "bedarf_warmwasser": 8431
+   },
+   {
+    "gwr_egid": 184379,
+    "building_id": 1744722,
+    "klasse": 3,
+    "flaeche": 103.8,
+    "stromertrag": 17755,
+    "bedarf_heizung": 93376,
+    "bedarf_warmwasser": 8431
+   },
+   {
+    "gwr_egid": 184379,
+    "building_id": 1744722,
+    "klasse": 2,
+    "flaeche": 63.4,
+    "stromertrag": 8341,
+    "bedarf_heizung": 93376,
+    "bedarf_warmwasser": 8431
+   },
+   {
+    "gwr_egid": 184379,
+    "building_id": 1744722,
+    "klasse": 1,
+    "flaeche": 134.9,
+    "stromertrag": 15064,
+    "bedarf_heizung": 93376,
+    "bedarf_warmwasser": 8431
+   },
+   {
+    "gwr_egid": 184379,
+    "building_id": 1744722,
+    "klasse": 3,
+    "flaeche": 23.2,
+    "stromertrag": 4406,
+    "bedarf_heizung": 93376,
+    "bedarf_warmwasser": 8431
+   },
+   {
+    "gwr_egid": 184379,
+    "building_id": 1744722,
+    "klasse": 2,
+    "flaeche": 31.4,
+    "stromertrag": 4312,
+    "bedarf_heizung": 93376,
+    "bedarf_warmwasser": 8431
+   },
+   {
+    "gwr_egid": 184379,
+    "building_id": 1744722,
+    "klasse": 1,
+    "flaeche": 44.2,
+    "stromertrag": 4875,
+    "bedarf_heizung": 93376,
+    "bedarf_warmwasser": 8431
+   },
+   {
+    "gwr_egid": 184379,
+    "building_id": 1744722,
+    "klasse": 2,
+    "flaeche": 10.8,
+    "stromertrag": 1695,
+    "bedarf_heizung": 93376,
+    "bedarf_warmwasser": 8431
+   },
+   {
+    "gwr_egid": 184379,
+    "building_id": 1744722,
+    "klasse": 2,
+    "flaeche": 10.8,
+    "stromertrag": 1676,
+    "bedarf_heizung": 93376,
+    "bedarf_warmwasser": 8431
+   },
+   {
+    "gwr_egid": 184379,
+    "building_id": 1744722,
+    "klasse": 4,
+    "flaeche": 7.2,
+    "stromertrag": 1407,
+    "bedarf_heizung": 93376,
+    "bedarf_warmwasser": 8431
+   },
+   {
+    "gwr_egid": 184379,
+    "building_id": 1744722,
+    "klasse": 2,
+    "flaeche": 8.6,
+    "stromertrag": 1233,
+    "bedarf_heizung": 93376,
+    "bedarf_warmwasser": 8431
+   }
+  ],
+  "211552": [
+   {
+    "gwr_egid": 211552,
+    "building_id": 3303437,
+    "klasse": 2,
+    "flaeche": 57.6,
+    "stromertrag": 8182,
+    "bedarf_heizung": 28997,
+    "bedarf_warmwasser": 2512
+   },
+   {
+    "gwr_egid": 211552,
+    "building_id": 2908130,
+    "klasse": 4,
+    "flaeche": 95.5,
+    "stromertrag": 19385,
+    "bedarf_heizung": 117135,
+    "bedarf_warmwasser": 7983
+   },
+   {
+    "gwr_egid": 211552,
+    "building_id": 2908130,
+    "klasse": 1,
+    "flaeche": 91.4,
+    "stromertrag": 11102,
+    "bedarf_heizung": 117135,
+    "bedarf_warmwasser": 7983
+   },
+   {
+    "gwr_egid": 211552,
+    "building_id": 2908130,
+    "klasse": 3,
+    "flaeche": 11,
+    "stromertrag": 1962,
+    "bedarf_heizung": 117135,
+    "bedarf_warmwasser": 7983
+   },
+   {
+    "gwr_egid": 211552,
+    "building_id": 2908130,
+    "klasse": 4,
+    "flaeche": 72.1,
+    "stromertrag": 15164,
+    "bedarf_heizung": 117135,
+    "bedarf_warmwasser": 7983
+   },
+   {
+    "gwr_egid": 211552,
+    "building_id": 2908130,
+    "klasse": 2,
+    "flaeche": 11,
+    "stromertrag": 1513,
+    "bedarf_heizung": 117135,
+    "bedarf_warmwasser": 7983
+   },
+   {
+    "gwr_egid": 211552,
+    "building_id": 2908130,
+    "klasse": 1,
+    "flaeche": 71.1,
+    "stromertrag": 6133,
+    "bedarf_heizung": 117135,
+    "bedarf_warmwasser": 7983
+   }
+  ],
+  "522994": [
+   {
+    "gwr_egid": 522994,
+    "building_id": 1140655,
+    "klasse": 1,
+    "flaeche": 392.8,
+    "stromertrag": 36764,
+    "bedarf_heizung": 80489,
+    "bedarf_warmwasser": 5006
+   },
+   {
+    "gwr_egid": 522994,
+    "building_id": 927553,
+    "klasse": 4,
+    "flaeche": 104.3,
+    "stromertrag": 21944,
+    "bedarf_heizung": 404543,
+    "bedarf_warmwasser": 24984
+   },
+   {
+    "gwr_egid": 522994,
+    "building_id": 927553,
+    "klasse": 4,
+    "flaeche": 604.5,
+    "stromertrag": 127100,
+    "bedarf_heizung": 404543,
+    "bedarf_warmwasser": 24984
+   },
+   {
+    "gwr_egid": 522994,
+    "building_id": 927553,
+    "klasse": 2,
+    "flaeche": 104.3,
+    "stromertrag": 15385,
+    "bedarf_heizung": 404543,
+    "bedarf_warmwasser": 24984
+   },
+   {
+    "gwr_egid": 522994,
+    "building_id": 927553,
+    "klasse": 2,
+    "flaeche": 600.6,
+    "stromertrag": 89466,
+    "bedarf_heizung": 404543,
+    "bedarf_warmwasser": 24984
+   },
+   {
+    "gwr_egid": 522994,
+    "building_id": 2432224,
+    "klasse": 2,
+    "flaeche": 67.3,
+    "stromertrag": 9652,
+    "bedarf_heizung": 4311,
+    "bedarf_warmwasser": 268
+   }
+  ],
+  "1764933": [
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 4,
+    "flaeche": 164.4,
+    "stromertrag": 32509,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   },
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 3,
+    "flaeche": 200,
+    "stromertrag": 34872,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   },
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 2,
+    "flaeche": 149.4,
+    "stromertrag": 22761,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   },
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 4,
+    "flaeche": 133.4,
+    "stromertrag": 28820,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   },
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 3,
+    "flaeche": 185.7,
+    "stromertrag": 35559,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   },
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 3,
+    "flaeche": 148.9,
+    "stromertrag": 27039,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   },
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 2,
+    "flaeche": 156.8,
+    "stromertrag": 20871,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   },
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 4,
+    "flaeche": 151.2,
+    "stromertrag": 32001,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   },
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 2,
+    "flaeche": 13.3,
+    "stromertrag": 1716,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   },
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 4,
+    "flaeche": 15.3,
+    "stromertrag": 3385,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   },
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 4,
+    "flaeche": 36.5,
+    "stromertrag": 7209,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   },
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 4,
+    "flaeche": 208.5,
+    "stromertrag": 41034,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   },
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 4,
+    "flaeche": 20.3,
+    "stromertrag": 3984,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   },
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 2,
+    "flaeche": 29,
+    "stromertrag": 3828,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   },
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 3,
+    "flaeche": 99.3,
+    "stromertrag": 18043,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   },
+   {
+    "gwr_egid": 1764933,
+    "building_id": 2271380,
+    "klasse": 3,
+    "flaeche": 21.8,
+    "stromertrag": 3975,
+    "bedarf_heizung": 517339,
+    "bedarf_warmwasser": 51409
+   }
+  ],
+  "302063214": [
+   {
+    "gwr_egid": 302063214,
+    "building_id": 1706873,
+    "klasse": 3,
+    "flaeche": 1078.7,
+    "stromertrag": 197610,
+    "bedarf_heizung": 338508,
+    "bedarf_warmwasser": 244252
+   },
+   {
+    "gwr_egid": 302063214,
+    "building_id": 3791070,
+    "klasse": 2,
+    "flaeche": 109.3,
+    "stromertrag": 14127,
+    "bedarf_heizung": 338425,
+    "bedarf_warmwasser": 244252
+   },
+   {
+    "gwr_egid": 302063214,
+    "building_id": 3791070,
+    "klasse": 1,
+    "flaeche": 153.7,
+    "stromertrag": 19284,
+    "bedarf_heizung": 338425,
+    "bedarf_warmwasser": 244252
+   }
+  ],
+  "52947": [],
+  "190194511": [],
+  "302066155": []
+ },
+ "solar_at_point": {
+  "52947": [
+   {
+    "gwr_egid": 52945,
+    "building_id": 2413409,
+    "klasse": 3,
+    "flaeche": 20.3,
+    "stromertrag": 3738,
+    "bedarf_heizung": 186979,
+    "bedarf_warmwasser": 56832
+   }
+  ],
+  "190194511": [
+   {
+    "gwr_egid": 587239,
+    "building_id": 3270051,
+    "klasse": 2,
+    "flaeche": 373.8,
+    "stromertrag": 50773,
+    "bedarf_heizung": 234073,
+    "bedarf_warmwasser": 14296
+   }
+  ],
+  "302066155": [
+   {
+    "gwr_egid": 155193,
+    "building_id": 1528126,
+    "klasse": 1,
+    "flaeche": 95.6,
+    "stromertrag": 11919,
+    "bedarf_heizung": 458728,
+    "bedarf_warmwasser": 29628
+   }
+  ]
+ },
+ "storm_kmh_50": {
+  "52947": "130 ± 21 km/h",
+  "302063214": "122 ± 21 km/h",
+  "211552": "104 ± 25 km/h",
+  "1764933": "104 ± 21 km/h",
+  "184379": "122 ± 20 km/h",
+  "522994": "126 ± 21 km/h",
+  "190194511": "124 ± 20 km/h",
+  "302066155": "123 ± 21 km/h"
+ },
+ "wms": {
+  "52947": {
+   "ch.bafu.aquaprotect_100": "Feature 2284",
+   "ch.bafu.aquaprotect_500": "Feature 2167",
+   "hail": "4"
+  },
+  "302063214": {
+   "hail": "4"
+  },
+  "211552": {
+   "ch.bafu.aquaprotect_500": "Feature 1903",
+   "hail": "4"
+  },
+  "1764933": {
+   "hail": "3.5"
+  },
+  "184379": {
+   "hail": "4"
+  },
+  "522994": {
+   "hail": "3.5"
+  },
+  "190194511": {
+   "hail": "3.5"
+  },
+  "302066155": {
+   "hail": "3.5"
+  }
+ }
+}

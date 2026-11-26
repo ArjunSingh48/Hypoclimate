@@ -79,6 +79,14 @@ with tab_check:
         if after and after[1] != ltv:
             m3.caption(f"{after[0]}–{after[1]}% after flood-zone discount")
         st.info(r["summary"])
+        src = r["meta"].get("address_source")
+        if src:
+            st.caption(f"Address found via: {src}"
+                       + (f" · {r['meta']['match_note']}" if r["meta"].get("match_note") else ""))
+        if r["meta"]["mode"] == "example":
+            st.caption("Example mode: stored values from the group's manual query, not a live lookup.")
+        if r["meta"].get("warnings"):
+            st.warning("Please check:\n\n" + "\n\n".join(f"- {w}" for w in r["meta"]["warnings"]))
         if r["meta"].get("errors"):
             st.warning("Some data could not be loaded (shown as 'No data'):\n\n" + "\n\n".join(
                 f"- {k}: {v}" for k, v in r["meta"]["errors"].items()))

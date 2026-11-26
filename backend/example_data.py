@@ -24,6 +24,7 @@ EXAMPLES = {
         "building": {
             "period_label": "1946-1960", "period_end_year": 1960,
             "floors": 4, "flats": 5, "footprint_m2": 173, "energy_source": "gas",
+            "category": "residential only",  # as described in the group mockup (5 flats)
         },
         "energy": {
             "heat_demand_kwh": 59300, "hot_water_kwh": 9500,
