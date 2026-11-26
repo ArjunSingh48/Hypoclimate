@@ -33,57 +33,70 @@ def test_clean_address_and_missing_data():
     assert r["chf"]["value_discount"] is None
 
 
-def test_live_parsing_with_mocked_api(monkeypatch):
-    monkeypatch.setattr(geoadmin, "geocode", lambda a: {
-        "label": "Teststrasse 1, 3000 Bern", "e": 2600000.0, "n": 1200000.0,
-        "egid": 111, "feature_id": "111_0"})
-    hits = [
-        {"layerBodId": "ch.bafu.aquaprotect_100", "attributes": {}},
-        {"layerBodId": "ch.meteoschweiz.hagelgefaehrdung-korngroesse_50_jahre",
-         "attributes": {"label": "5.5 cm"}},
-        {"layerBodId": "ch.bafu.sturm-boeenspitzen_50", "attributes": {"wert": 150}},
-    ]
-    monkeypatch.setattr(geoadmin, "identify", lambda e, n, layers, tolerance_px=0: [
-        h for h in hits if h["layerBodId"] in layers])
-    monkeypatch.setattr(geoadmin, "building", lambda fid: {
-        "gbaup": 8012, "gastw": 3, "ganzwhg": 2, "garea": 120, "genh1": 7530})
-    monkeypatch.setattr(geoadmin, "solar", lambda e, n: [
-        {"attributes": {"gwr_egid": 111, "klasse": 3, "flaeche": 40, "stromertrag": 6000,
-                        "bedarf_heizung": 30000, "bedarf_warmwasser": 4000}},
-        {"attributes": {"gwr_egid": 111, "klasse": 5, "flaeche": 50, "stromertrag": 9000}}])
-    r = engine.score("Teststrasse 1", 1_000_000, 700_000, mode="live")
-    assert r["hazards"]["hail_50y"]["level"] == "high"
-    assert r["hazards"]["storm_50y"]["level"] == "high"
-    assert r["scores"]["physical"] == 5          # flood + hail + storm high
-    assert r["building"]["energy_source"] == "oil"
-    assert r["scores"]["transition"] == 5        # oil 4 + built before 1946
-    assert r["energy"]["roof_class"] == "excellent" and r["energy"]["solar_kwh"] == 9000
-    assert r["chf"]["co2_levy_per_year"] == round(30000 * 0.265 / 1000 * 120)
-
-
-def test_one_bad_layer_does_not_break_the_rest(monkeypatch):
-    import requests
-    monkeypatch.setattr(geoadmin, "geocode", lambda a: {
-        "label": "Sihlmatten 7, 8134 Adliswil", "e": 2682407.25, "n": 1239689.125,
-        "egid": 222, "feature_id": "222_0"})
-
-    def fake_identify(e, n, layers, tolerance_px=0):
-        if layers == ["ch.bafu.aquaprotect_500"]:
-            raise requests.HTTPError("400 Client Error: Bad Request")
-        if layers == ["ch.bafu.aquaprotect_100"]:
-            return [{"layerBodId": layers[0], "attributes": {}}]
-        return []
-    monkeypatch.setattr(geoadmin, "identify", fake_identify)
-    monkeypatch.setattr(geoadmin, "building", lambda fid: {"gbaup": 8019, "genh1": 7520, "ganzwhg": 6})
-    monkeypatch.setattr(geoadmin, "solar", lambda e, n: (_ for _ in ()).throw(requests.HTTPError("500")))
-    r = engine.score("Sihlmatten 7, 8134 Adliswil", 2_000_000, 800_000, mode="live")
-    assert r["hazards"]["extreme_flood_300plus"]["level"] == "unknown"
-    assert r["hazards"]["river_flood_100"]["level"] == "high"
-    assert set(r["meta"]["errors"]) == {"ch.bafu.aquaprotect_500", "solar roofs"}
-    assert r["building"]["energy_source"] == "gas"
-
-
 def test_coordinates_bern():
     from backend import geoadmin as g
     lat, lon = g.lv95_to_wgs84(2601406, 1199640)
     assert 46.94 < lat < 46.96 and 7.44 < lon < 7.47
+
+
+# Real answers recorded from geo.admin.ch on 24.11.2026 (Gerberngasse 20, Bern / Sihlmatten 7, Adliswil)
+WMS_FLOOD_INSIDE = "GetFeatureInfo results:\n\nLayer 'ch.bafu.aquaprotect_100'\n  Feature 1603: \n"
+WMS_NO_RESULT = "GetFeatureInfo results:\n\n  Search returned no results.\n"
+WMS_HAIL_4CM = ("GetFeatureInfo results:\n\nLayer 'ch.meteoschweiz.hagelgefaehrdung-korngroesse_50_jahre'\n"
+                "  Feature 0: \n    ch.meteoschweiz.hagelgefaehrdung-korngroesse_50_jahre.value_0.name = '4'\n")
+STORM_130 = {"layerBodId": "ch.bafu.sturm-boeenspitzen_50", "featureId": 10779, "id": 10779,
+             "attributes": {"boenspitzen_kmh_30": "121 ± 20 km/h", "boenspitzen_ms_30": "34 ± 6 m/s",
+                            "boenspitzen_kmh_50": "130 ± 21 km/h", "boenspitzen_ms_50": "36 ± 6 m/s",
+                            "label": 10779}}
+
+
+def test_parse_real_wms_answers():
+    assert geoadmin.parse_feature_info(WMS_FLOOD_INSIDE, "ch.bafu.aquaprotect_100") == [{}]
+    assert geoadmin.parse_feature_info(WMS_NO_RESULT, "ch.bafu.silvaprotect-sturz") == []
+    hail = geoadmin.parse_feature_info(WMS_HAIL_4CM, "ch.meteoschweiz.hagelgefaehrdung-korngroesse_50_jahre")
+    assert hail == [{"value_0.name": "4"}]
+
+
+def _fake_live(monkeypatch, wms_answers, fail=()):
+    import requests
+    monkeypatch.setattr(geoadmin, "geocode", lambda a: {
+        "label": "Gerberngasse 20 3011 Bern", "e": 2601406.0, "n": 1199640.0,
+        "egid": 1230068, "feature_id": "1230068_0"})
+
+    def fake_wms(e, n, layer):
+        if layer in fail:
+            raise requests.HTTPError("502 Server Error")
+        return geoadmin.parse_feature_info(wms_answers.get(layer, WMS_NO_RESULT), layer)
+    monkeypatch.setattr(geoadmin, "wms_feature_info", fake_wms)
+    monkeypatch.setattr(geoadmin, "identify", lambda e, n, layers, tolerance_px=0:
+                        [STORM_130] if layers == ["ch.bafu.sturm-boeenspitzen_50"] else [])
+    monkeypatch.setattr(geoadmin, "building", lambda fid: {
+        "gbaup": 8013, "gastw": 4, "ganzwhg": 5, "garea": 173, "genh1": 7520})
+    monkeypatch.setattr(geoadmin, "solar_by_egid", lambda egid: [
+        {"attributes": {"gwr_egid": 1230068, "klasse": 4, "flaeche": 75, "stromertrag": 15100,
+                        "bedarf_heizung": 59300, "bedarf_warmwasser": 9500}}])
+
+
+def test_live_bern_with_real_answers(monkeypatch):
+    _fake_live(monkeypatch, {"ch.bafu.aquaprotect_100": WMS_FLOOD_INSIDE,
+                             "ch.bafu.aquaprotect_500": WMS_FLOOD_INSIDE.replace("_100", "_500"),
+                             "ch.meteoschweiz.hagelgefaehrdung-korngroesse_50_jahre": WMS_HAIL_4CM})
+    r = engine.score("Gerberngasse 20, 3011 Bern", 1_250_000, 800_000, mode="live")
+    h = r["hazards"]
+    assert h["river_flood_100"]["level"] == "high"
+    assert h["extreme_flood_300plus"]["level"] == "high"
+    assert h["surface_runoff"]["level"] == "low"
+    assert h["hail_50y"]["level"] == "medium" and h["hail_50y"]["finding"] == "4 cm"
+    assert h["storm_50y"]["level"] == "medium" and h["storm_50y"]["finding"] == "130 km/h"
+    assert h["rockfall"]["level"] == "low" and h["avalanche"]["level"] == "low"
+    assert r["scores"]["physical"] == 4 and r["scores"]["transition"] == 3
+    assert r["meta"]["errors"] == {}
+
+
+def test_one_failing_layer_does_not_break_the_rest(monkeypatch):
+    _fake_live(monkeypatch, {"ch.bafu.aquaprotect_100": WMS_FLOOD_INSIDE},
+               fail=("ch.bafu.silvaprotect-sturz",))
+    r = engine.score("Gerberngasse 20, 3011 Bern", 1_250_000, 800_000, mode="live")
+    assert r["hazards"]["rockfall"]["level"] == "unknown"
+    assert r["hazards"]["river_flood_100"]["level"] == "high"
+    assert set(r["meta"]["errors"]) == {"ch.bafu.silvaprotect-sturz"}
