@@ -147,8 +147,8 @@ def test_all_roofs_of_a_big_building_are_counted(recorded):
 def test_heat_demand_of_main_building_part(recorded):
     r = run("St. Leodegarstrasse 6")
     assert r["energy"]["heat_demand_kwh"] == 117135
-    assert r["energy"]["heat_demand_all_parts_kwh"] == 117135 + 28997
-    assert any("2 parts" in w for w in r["meta"]["warnings"])
+    assert "heat_demand_all_parts_kwh" not in r["energy"]
+    assert not any("parts" in w for w in r["meta"]["warnings"])
 
 
 def test_missing_heating_entry_gives_no_score(recorded):

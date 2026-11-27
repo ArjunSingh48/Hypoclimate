@@ -16,10 +16,12 @@ def cand(label, detail, egid, e=2600000.0, n=1200000.0):
 
 
 def test_parse_address():
-    assert geoadmin.parse_address("Uetlibergstrasse 111b") == {
-        "street": "uetlibergstrasse", "number": "111b", "postcode": None}
+    assert geoadmin.parse_address("Uetlibergstrasse 111b") == {"street": "uetlibergstrasse", "number": "111b", "postcode": None}
     assert geoadmin.parse_address("Bielstrasse 3, 4500 Solothurn")["postcode"] == "4500"
     assert geoadmin.parse_address("Buschberghof 261, 5064 Wittnau")["number"] == "261"
+    assert geoadmin.parse_address("Clausiusstrasse 16 8006 Zürich") == {"street": "clausiusstrasse", "number": "16", "postcode": "8006"}
+    assert geoadmin.parse_address("Uetlibergstrasse 111b 8045 Zürich")["number"] == "111b"
+    assert geoadmin.parse_address("Sihlmatten 7 8134 adliswil")["postcode"] == "8134"
 
 
 def test_best_candidate_wins_not_first(monkeypatch):

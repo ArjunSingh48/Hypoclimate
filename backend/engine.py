@@ -159,10 +159,6 @@ def _plausibility(hazards: dict, b: dict, en: dict, loc: dict) -> list[str]:
             and b["category"] not in config.HEAT_PUMP_COST_CATEGORIES:
         w.append(f"heat pump cost is estimated per flat, which does not fit a "
                  f"{b['category']} building; not calculated")
-    if en.get("building_parts", 0) > 1:
-        w.append(f"the solar register splits this building into {en['building_parts']} parts; "
-                 f"heat demand is the main part's ({en['heat_demand_kwh']:,.0f} kWh/yr), "
-                 f"all parts together {en['heat_demand_all_parts_kwh']:,.0f} kWh/yr")
     return w
 
 
@@ -204,11 +200,9 @@ def _read_solar(roofs: list[dict], egid: int | None, roof_owner: dict | None = N
         p["heat"] = p["heat"] if p["heat"] is not None else num(r, ["bedarf_heizung", "heizwaermebedarf"])
         p["water"] = p["water"] if p["water"] is not None else num(r, ["bedarf_warmwasser"])
     main = max(parts.values(), key=lambda p: p["area"])
-    heat_all = sum(p["heat"] or 0 for p in parts.values())
     return {
         # the heat demand of another building is never used for this one
         "heat_demand_kwh": main["heat"] if matched else None,
-        "heat_demand_all_parts_kwh": heat_all if matched else None,
         "hot_water_kwh": main["water"] if matched else None,
         "building_parts": len(parts) if matched else 0,
         "roof_area_m2": num(best, ["flaeche"]),
