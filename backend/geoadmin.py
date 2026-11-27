@@ -56,6 +56,10 @@ _POSTCODE = re.compile(r"\b(\d{4})\b")
 def parse_address(address: str) -> dict:
     """Split a typed address into street words, house number and postcode (if present)."""
     head, _, tail = address.partition(",")
+    if not tail:  # no comma: "Street 16 8006 Zürich" -> the 4-digit number after the house number is the postcode
+        m = re.match(r"^(.*\b\d+\s?[a-z]?)\s+(\d{4}\b.*)$", _norm(head))
+        if m:
+            head, tail = m.group(1), m.group(2)
     no = _HOUSE_NO.findall(_norm(head))
     pc = _POSTCODE.findall(_norm(tail)) if tail else []
     street = re.sub(r"\d+\s?[a-z]?\b", " ", _norm(head))
