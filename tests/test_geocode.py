@@ -143,3 +143,15 @@ def test_live_check_tool_runs(monkeypatch, tmp_path):
     run = json.loads(saved[0].read_text(encoding="utf-8"))[0]
     assert run["status"] == "ok" and run["result"]["egid"] == 77
     assert run["result"]["hazards"]["storm_50y"]["finding"] == "125 km/h"
+
+
+def test_canton_from_address_search_detail():
+    from backend.geoadmin import canton_from_detail
+    assert canton_from_detail("sihlmatten 7 8134 adliswil 131 adliswil ch zh") == "ZH"
+    assert canton_from_detail("leodegarstrasse 6 5524 niederwil ag 4072 niederwil _ag_ ch ag") == "AG"
+    assert canton_from_detail("") is None
+
+
+def test_example_result_has_canton():
+    from backend import engine
+    assert engine.score("Gerberngasse 20, 3011 Bern", mode="example")["canton"] == "BE"

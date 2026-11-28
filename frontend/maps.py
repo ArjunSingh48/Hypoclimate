@@ -15,7 +15,11 @@ OVERLAYS = {
     "Surface runoff": "ch.bafu.gefaehrdungskarte-oberflaechenabfluss",
     "Hail 50-yr": "ch.meteoschweiz.hagelgefaehrdung-korngroesse_50_jahre",
     "Storm 50-yr": "ch.bafu.sturm-boeenspitzen_50",
+    "Rockfall": "ch.bafu.silvaprotect-sturz",
+    "Avalanche": "ch.bafu.silvaprotect-lawinen",
+    "Solar roofs": "ch.bfe.solarenergie-eignung-daecher",
 }
+LEGEND_URL = "https://api3.geo.admin.ch/static/images/legends/{layer}_en.png"
 SCORE_COLOUR = {1: "#2e7d32", 2: "#2e7d32", 3: "#ef6c00", 4: "#c62828", 5: "#7f0000"}
 
 
@@ -46,3 +50,18 @@ def portfolio_map(points: list[dict]):
                             fill_opacity=0.8, fill_color=SCORE_COLOUR.get(p["physical"], "#9e9e9e"),
                             tooltip=p["label"]).add_to(m)
     return m
+
+
+def legend_html(names=None) -> str:
+    """Official geo.admin.ch legend images for the map layers, on white so they read in dark mode.
+
+    Like the map tiles, the images load in the user's browser directly from geo.admin.ch.
+    """
+    items = "".join(
+        f"<div style='break-inside:avoid;margin:0 0 10px'>"
+        f"<div style='font-size:12px;font-weight:600;color:#1d1d1d;margin-bottom:3px'>{name}</div>"
+        f"<img src='{LEGEND_URL.format(layer=layer)}' alt='Legend: {name}' "
+        f"style='max-width:100%;height:auto'></div>"
+        for name, layer in OVERLAYS.items() if names is None or name in names)
+    return (f"<div style='background:#fff;border-radius:6px;padding:10px 12px;"
+            f"column-count:2;column-gap:16px'>{items}</div>")

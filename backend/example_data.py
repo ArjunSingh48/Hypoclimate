@@ -11,6 +11,7 @@ EXAMPLES = {
     "gerberngasse 20, 3011 bern": {
         "address": "Gerberngasse 20, 3011 Bern",
         "egid": 1230068,
+        "canton": "BE",
         "lv95": {"e": 2601406, "n": 1199640},
         "hazards": {
             "river_flood_100": {"inside": True},
@@ -35,6 +36,7 @@ EXAMPLES = {
     "zürichbergstrasse 221, zürich": {
         "address": "Zürichbergstrasse 221, Zürich",
         "egid": None,
+        "canton": "ZH",
         "lv95": None,
         "hazards": {
             "river_flood_100": {"inside": False},

@@ -117,6 +117,7 @@ def _collect_live(address: str) -> dict:
 
     return {
         "address": loc["label"], "egid": egid, "lv95": {"e": e, "n": n},
+        "canton": loc.get("canton") or (str(attrs.get("gdekt")).upper() if attrs.get("gdekt") else None),
         "hazards": hazards, "building": building, "energy": energy,
         "queried_at": date.today().isoformat(), "mode": "live", "raw": raw,
         "errors": errors, "warnings": _plausibility(hazards, building, energy, loc),
@@ -281,6 +282,7 @@ def evaluate(facts: dict, property_value: float | None = None,
     return {
         "address": facts["address"],
         "egid": facts.get("egid"),
+        "canton": facts.get("canton"),
         "lv95": lv,
         "wgs84": {"lat": round(wgs[0], 6), "lon": round(wgs[1], 6)} if wgs else None,
         "hazards": hazards,

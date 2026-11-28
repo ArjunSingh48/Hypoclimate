@@ -1,7 +1,7 @@
 """HypoClimate prototype (Streamlit).
 
 Start (on your laptop, in the hypoclimate folder):  streamlit run frontend/app.py
-Four screens: Address check · Bank portfolio · Method & data · Tests
+Five screens: Address check · Advisor report · Bank portfolio · Method & data · Tests
 """
 import io
 import json
@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 from streamlit_folium import st_folium
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,10 +33,9 @@ st.sidebar.markdown("**Example-mode addresses**\n\n- Gerberngasse 20, 3011 Bern\
 st.sidebar.caption("The bank portfolio always offers an invented example book, "
                    "or your own CSV scored in the selected mode.")
 
-tab_check, tab_book, tab_method, tab_tests = st.tabs(
-    ["Address check", "Bank portfolio", "Method & data", "Tests"])
+tab_check, tab_report, tab_book, tab_method, tab_tests = st.tabs(
+    ["Address check", "Advisor report", "Bank portfolio", "Method & data", "Tests"])
 
-LEVEL_ICON = {"high": "🔴 High", "medium": "🟠 Medium", "low": "🟢 Low", "unknown": "⚪ No data"}
 
 
 def chf(v):
@@ -47,6 +47,67 @@ def chf_range(r):
         return "–"
     a, b = sorted(r, key=abs)
     return f"CHF {a:,.0f} to {b:,.0f}".replace(",", "'")
+
+
+# Address-check helpers: how the hazards, building and location are shown (no calculations)
+LEVEL_BADGE = {"high": ":red[**High**]", "medium": ":orange[**Medium**]",
+               "low": ":green[**Low**]", "unknown": ":gray[No data]"}
+LEVEL_ORDER = {"unknown": 0, "low": 1, "medium": 2, "high": 3}
+HAZARD_SOURCE = {
+    "river_flood_100": "FOEN Aquaprotect 100 · indicative",
+    "extreme_flood_300plus": "FOEN Aquaprotect 500 · indicative",
+    "surface_runoff": "FOEN surface runoff map",
+    "hail_50y": "MeteoSwiss hail climatology",
+    "storm_50y": "FOEN storm hazard map",
+    "rockfall": "FOEN SilvaProtect-CH",
+}
+CATEGORY_TEXT = {"residential only": "Purely residential",
+                 "residential with other use": "Residential with other use",
+                 "partly residential": "Partly residential"}
+HAZARD_TITLE = {"hail_50y": "Hail", "storm_50y": "Storm", "rockfall": "Rockfall & avalanche"}
+
+
+def hazard_cards(hz: dict) -> list[dict]:
+    """One card per hazard as in the mockup; rockfall and avalanche share one card."""
+    cards = []
+    for key, h in hz.items():
+        if key == "avalanche":
+            continue
+        if key == "rockfall":
+            pair = {"rockfall": h, "avalanche": hz["avalanche"]}
+            level = max((x["level"] for x in pair.values()), key=LEVEL_ORDER.get)
+            inside = [k for k, x in pair.items() if x["finding"] == "inside zone"]
+            missing = [k for k, x in pair.items() if x["level"] == "unknown"]
+            if inside:
+                finding = f"Inside {' and '.join(inside)} hazard area"
+            elif len(missing) == 2:
+                finding = report.finding_text(key, h)
+            else:
+                finding = "Outside hazard areas" + (f" ({missing[0]}: no data)" if missing else "")
+        else:
+            level, finding = h["level"], report.finding_text(key, h)
+        cards.append({"title": HAZARD_TITLE.get(key, h["label"]), "level": level,
+                      "finding": finding, "source": HAZARD_SOURCE.get(key, h["source"])})
+    return cards
+
+
+def kv_grid(items: list[tuple], ncols: int = 2):
+    """Label above value, in a grid (like the building box in the mockup)."""
+    for i in range(0, len(items), ncols):
+        for col, (label, val) in zip(st.columns(ncols), items[i:i + ncols]):
+            col.caption(label)
+            col.markdown(f"{val}")
+
+
+def location_line(r: dict) -> str:
+    parts = []
+    if r.get("lv95"):
+        parts.append(f"LV95 E {report.fmt_num(r['lv95']['e'])} · N {report.fmt_num(r['lv95']['n'])}")
+    if r.get("egid"):
+        parts.append(f"EGID {r['egid']}")
+    if r.get("canton"):
+        parts.append(f"canton {r['canton']}")
+    return " · ".join(parts) + (" · " if parts else "") + "base map and hazard layers: swisstopo, FOEN, MeteoSwiss, SFOE"
 
 
 # ---------------------------------------------------------------- Address check
@@ -61,8 +122,10 @@ with tab_check:
             with st.spinner("Querying federal open data …"):
                 st.session_state["result"] = engine.score(
                     address, value or None, mortgage or None, mode=mode)
+                st.session_state["inputs"] = (value or None, mortgage or None)
         except Exception as exc:
             st.session_state.pop("result", None)
+            st.session_state.pop("inputs", None)
             st.error(str(exc))
 
     r = st.session_state.get("result")
@@ -97,11 +160,11 @@ with tab_check:
                 st.markdown("**Map** (switch hazard layers on the right of the map)")
                 st_folium(maps.address_map(r["wgs84"]["lat"], r["wgs84"]["lon"], r["address"]),
                           height=380, use_container_width=True, returned_objects=[])
-            st.markdown("**Natural hazards at this address**")
-            st.dataframe(pd.DataFrame([
-                {"Hazard": h["label"], "Level": LEVEL_ICON[h["level"]],
-                 "Finding": h["finding"], "Source layer": h["source"]}
-                for h in r["hazards"].values()]), hide_index=True, use_container_width=True)
+                with st.expander("Map legend: what the colours mean"):
+                    st.markdown(maps.legend_html(), unsafe_allow_html=True)
+                    st.caption("Official legends from geo.admin.ch. Layers are shown at 60% opacity, "
+                               "so colours on the map look lighter.")
+            st.caption(location_line(r))
         with right:
             c = r["chf"]
             st.markdown("**What it means for the mortgage** (illustrative estimates)")
@@ -113,37 +176,92 @@ with tab_check:
                 {"Item": "Rooftop solar income",
                  "CHF": chf(c["solar_income_per_year"]) + (" / yr" if c["solar_income_per_year"] else "")},
             ]), hide_index=True, use_container_width=True)
-            b, en = r["building"], r["energy"]
-            st.markdown("**Building and energy**")
-            st.dataframe(pd.DataFrame([
-                {"Item": "Built", "Value": b.get("period_label") or "–"},
-                {"Item": "Floors / flats", "Value": f"{b.get('floors') or '–'} / {b.get('flats') or '–'}"},
-                {"Item": "Heating", "Value": b.get("energy_source") or "–"},
-                {"Item": "Heating demand", "Value": f"{en['heat_demand_kwh']:,.0f} kWh/yr"
-                    if en.get("heat_demand_kwh") else "–"},
-                {"Item": "Best roof for solar", "Value": f"{en['roof_area_m2']:g} m², {en['roof_class']}"
-                    if en.get("roof_area_m2") else (en.get("roof_class") or "–")},
-                {"Item": "Solar yield", "Value": f"{en['solar_kwh']:,.0f} kWh/yr"
-                    if en.get("solar_kwh") else "–"},
-            ]).astype(str), hide_index=True, use_container_width=True)
+            if r["hazards"]["river_flood_100"]["level"] == "high":
+                gv = config.CANTONAL_BUILDING_INSURER.get(r.get("canton") or "")
+                who = f"the cantonal building insurance ({gv})" if gv else "the building insurance"
+                st.caption(f"Flood damage to the building is covered by {who}. "
+                           "Contents, deductibles and downtime are not.")
             st.markdown("**Trend: heavy rain if warming rises**")
             st.dataframe(pd.DataFrame([
                 {"Extra warming": f"+{t['extra_warming_c']:g} °C",
                  "Heavy-rain intensity": f"about +{t['heavy_rain_intensity_change_pct']:g}%"}
                 for t in r["trend_50y"]]), hide_index=True, use_container_width=True)
 
-        st.markdown("**Advisor report**")
-        a1, a2, a3 = st.columns([1, 1, 1])
-        client = a1.text_input("Client name (optional)")
-        advisor = a2.text_input("Advisor name (optional)")
-        a3.download_button("Download advisor report (print to PDF)",
-                           report.advisor_report(r, client, advisor),
-                           file_name="hypoclimate_advisor_report.html", mime="text/html")
+        st.markdown("**Natural hazards at this address**")
+        cards = hazard_cards(r["hazards"])
+        for i in range(0, len(cards), 3):
+            for col, card in zip(st.columns(3), cards[i:i + 3]):
+                with col.container(border=True):
+                    st.markdown(f"**{card['title']}** &nbsp; {LEVEL_BADGE[card['level']]}")
+                    st.markdown(card["finding"])
+                    st.caption(card["source"])
+
+        b, en = r["building"], r["energy"]
+        bcol, ecol = st.columns(2)
+        with bcol.container(border=True):
+            st.markdown("**The building** · federal building register (GWR)")
+            if b:
+                kv_grid([
+                    ("Type", CATEGORY_TEXT.get(b.get("category"), report.cap_first(b.get("category")))),
+                    ("Built", (b.get("period_label") or "–").replace("-", "–")),
+                    ("Floors", b.get("floors") or "–"),
+                    ("Flats", b.get("flats") or "–"),
+                    ("Footprint", f"{b['footprint_m2']:,} m²".replace(",", "'")
+                        if b.get("footprint_m2") else "–"),
+                    ("Heating", report.cap_first(b.get("energy_source")) if b.get("energy_source")
+                        else "No entry in the register"),
+                    ("Building insurer", report.building_insurer(r.get("canton")) or "–"),
+                ] + ([("Heated area", f"{b['energy_area_m2']:,} m²".replace(",", "'"))]
+                     if b.get("energy_area_m2") else []))
+                gap = report.missing_building_fields(b)
+                if gap:
+                    st.caption(f"The register has no entry for {', '.join(gap)}. This is common for "
+                               "non-residential and some older buildings: ask the owner or check "
+                               "the building documents.")
+            else:
+                st.caption("No building found in the federal building register for this address.")
+        with ecol.container(border=True):
+            st.markdown("**Energy and transition** · Swiss Federal Office of Energy")
+            if en.get("roof_class") or en.get("heat_demand_kwh"):
+                kv_grid([
+                    ("Heating demand", report.fmt_num(en.get("heat_demand_kwh"), "kWh/yr")),
+                    ("Hot water demand", report.fmt_num(en.get("hot_water_kwh"), "kWh/yr")),
+                    ("Roof for solar", (f"{report.fmt_num(en['roof_area_m2'])} m², rated {en['roof_class']}"
+                                        if en.get("roof_area_m2") else en.get("roof_class") or "–")),
+                    ("Solar power yield", report.fmt_num(en.get("solar_kwh"), "kWh/yr")),
+                ])
+            else:
+                st.caption("No solar roof or heat demand found for this building.")
+            if b and not en.get("heat_demand_kwh"):
+                st.caption("Heating demand is estimated only when the register records the "
+                           "heating and the building size.")
+            if b.get("energy_source") in ("oil", "gas"):
+                st.warning("Fossil heating: when the boiler reaches end of life, cantonal energy "
+                           "rules may require a renewable replacement. Plan for it in the financing.")
+
+        st.info("The one-page report for the mortgage talk is ready in the **Advisor report** tab.")
         st.download_button("Download JSON (the format every screen uses)",
                            json.dumps({k: v for k, v in r.items()}, indent=2, ensure_ascii=False),
                            file_name="hypoclimate_result.json")
         st.caption(f"Mode: {r['meta']['mode']} · data as of {r['meta']['queried_at']} · "
                    f"assumptions {r['meta']['assumptions_version']} · {r['meta']['note']}")
+
+# ---------------------------------------------------------------- Advisor report
+with tab_report:
+    r = st.session_state.get("result")
+    if not r:
+        st.info("Check an address in the **Address check** tab first. The one-page report for "
+                "the mortgage talk then appears here.")
+    else:
+        pv, mg = st.session_state.get("inputs", (None, None))
+        st.caption("One A4 page for the client talk: scores, hazards, energy, costs to plan for, "
+                   "talking points and next steps. Every figure comes from the address check.")
+        a1, a2 = st.columns(2)
+        client = a1.text_input("Client name (optional)", key="report_client")
+        advisor = a2.text_input("Advisor name (optional)", key="report_advisor")
+        # the "Print / save as PDF" button sits inside the report and prints only the report
+        components.html(report.advisor_report(r, client, advisor, pv, mg), height=1360,
+                        scrolling=True)
 
 # ---------------------------------------------------------------- Bank portfolio
 with tab_book:
