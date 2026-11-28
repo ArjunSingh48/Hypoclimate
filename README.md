@@ -49,7 +49,7 @@ flowchart LR
 
     subgraph access [SCREENS & ACCESS]
         direction TB
-        ui[Streamlit app<br/>4 screens]:::front
+        ui[Streamlit app<br/>5 screens]:::front
         api[Web API<br/>GET /score]:::front
         cli[Command line<br/>batch · disaster test]:::front
     end
@@ -99,14 +99,14 @@ flowchart LR
 
 | Part | File | Talks to | Job |
 |---|---|---|---|
-| Screens | `frontend/app.py` | engine, portfolio, report, maps | Address check · Bank portfolio · Method & data · Tests |
+| Screens | `frontend/app.py` | engine, portfolio, report, maps | Address check · Advisor report · Bank portfolio · Method & data · Tests |
 | Web API | `backend/api.py` | engine | `GET /score` for brokers, platforms or another front end |
 | Command line | `backend/batch.py`, `backend/disaster_test.py` | engine | Score a CSV of addresses; check real disaster places |
 | Engine | `backend/engine.py` | geoadmin, config, example data | Step 1 collects facts, step 2 turns them into scores and CHF figures |
 | Rules | `backend/config.py` | – | Every threshold and CHF assumption, in one place |
 | API client | `backend/geoadmin.py` | geo.admin.ch | Address search, hazard layers, building register, solar roofs |
 | Portfolio | `backend/portfolio.py` | engine | Scores a whole mortgage book and sums it up |
-| Reports | `backend/report.py` | – | Printable advisor report and portfolio report |
+| Reports | `backend/report.py` | – | One-page advisor report (scores, hazards, costs, talking points, next steps, data gaps) and portfolio report |
 | Maps | `frontend/maps.py` | swisstopo tiles in the browser | Map with switchable federal hazard layers |
 | Example data | `backend/example_data.py`, `backend/example_portfolio.py` | – | Offline demo; the example mortgage book is invented |
 
@@ -178,7 +178,8 @@ All data is official, free and covers all of Switzerland (geo.admin.ch, open gov
 
 | Screen | For | What it shows |
 |---|---|---|
-| **Address check** | Mortgage advisor | Physical and transition score (1–5), hazards, building and energy, CHF figures, heavy-rain trend, map, advisor report |
+| **Address check** | Mortgage advisor | Physical and transition score (1–5), hazard cards with source, building and energy, cantonal building insurer, CHF figures, heavy-rain trend, map with 8 switchable layers and LV95/EGID |
+| **Advisor report** | Mortgage advisor and client | One A4 page for the mortgage talk: scores with main drivers, hazards, energy, costs to plan for, talking points, next steps and the data gaps to check; preview in the app, download and print to PDF |
 | **Bank portfolio** | Bank risk team | Key figures for the whole book, map of loans, hazard levels, heating mix, highest-risk loans, report and CSV export |
 | **Method & data** | Everyone, incl. FINMA | Every source and every assumption |
 | **Tests** | Project team | Disaster test on real disaster places |
@@ -244,6 +245,7 @@ Every rule and CHF assumption lives in **`backend/config.py`**, so the scoring c
 | Heat pump cost per flat | CHF 12'000–18'000 |
 | Solar income | CHF 0.10 per kWh |
 | Heavy-rain intensity per °C warming | about +7% |
+| Building insurer | cantonal insurer in 19 cantons (e.g. GVB in Bern); private insurers in GE, UR, SZ, TI, AI, VS, OW |
 | Hail levels (50-yr stone size) | < 3 cm low · 3–5 cm medium · ≥ 5 cm high |
 | Storm levels (50-yr gusts) | < 100 low · 100–140 medium · ≥ 140 km/h high |
 | Physical score (1–5) | worst hazard (low 1, medium 3, high 4), +1 if two perils are high |
@@ -255,7 +257,7 @@ Every rule and CHF assumption lives in **`backend/config.py`**, so the scoring c
 Every screen and the API use the same answer from `engine.score(address, value, mortgage)`:
 
 ```
-address, egid, lv95, wgs84,
+address, egid, canton, lv95, wgs84,
 hazards   { level, finding, source }   per hazard
 building  { period, floors, flats, energy_source }
 energy    { heat_demand_kwh, roof_class, solar_kwh }
@@ -271,7 +273,7 @@ trend_50y, summary, meta { queried_at, mode, assumptions_version, errors }
 
 ## 🧪 Tests
 
-`python3 -m pytest -q` runs 38 automatic tests. 16 of them replay the real answers the federal services gave on 26.11.2026 for 8 addresses across 5 cantons (`tests/fixtures/`), so the address matching, the building and roof matching and the scores are checked against real data, not invented data. Tests never use the internet. They also check that the Bern example gives exactly the figures from our mockup, that one failing data source does not break the rest, and that the reports and the portfolio summary are built correctly.
+`python3 -m pytest -q` runs 47 automatic tests. 16 of them replay the real answers the federal services gave on 26.11.2026 for 8 addresses across 5 cantons (`tests/fixtures/`), so the address matching, the building and roof matching and the scores are checked against real data, not invented data. Tests never use the internet. They also check that the Bern example gives exactly the figures from our mockup, that the advisor report shows the mockup content and lists missing data instead of hiding it, that one failing data source does not break the rest, and that the reports and the portfolio summary are built correctly.
 
 The **disaster test** (`data/disaster_tests.csv`) checks real places: the Matte quarter in Bern (Aare flood 2005) must be flagged, a hillside control address must come back clean.
 
@@ -298,7 +300,7 @@ hypoclimate/
     example_data.py         # offline example (Gerberngasse 20, Bern)
     batch.py                # score a CSV; coverage and speed
     api.py                  # web API (GET /score)
-    report.py               # advisor and portfolio reports (HTML, print to PDF)
+    report.py               # advisor report (one A4 page) and portfolio report (HTML, print to PDF)
     portfolio.py            # mortgage-book scoring and summary
     example_portfolio.py    # invented example mortgage book
     disaster_test.py        # check real disaster places

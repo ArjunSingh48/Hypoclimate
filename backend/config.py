@@ -94,6 +94,19 @@ EXTRA_WARMING_STEPS = (1.0, 2.0)          # shown as "if warming rises by 1 / 2 
 ASSUMPTIONS_VERSION = "v1"
 
 # ---------------------------------------------------------------------------
+# Building insurance against natural hazards (the "Swiss twist")
+# ---------------------------------------------------------------------------
+# 19 cantons have a public cantonal building insurer (mandatory, monopoly).
+# In GE, UR, SZ, TI, AI, VS and OW buildings are insured with private insurers.
+CANTONAL_BUILDING_INSURER = {
+    "ZH": "GVZ", "BE": "GVB", "LU": "GVL", "NW": "NSV", "GL": "glarnerSach", "ZG": "GVZG",
+    "FR": "ECAB/KGV", "SO": "SGV", "BS": "GVBS", "BL": "BGV", "SH": "GVSH",
+    "AR": "Assekuranz AR", "SG": "GVSG", "GR": "GVG", "AG": "AGV", "TG": "GVTG",
+    "VD": "ECA", "NE": "ECAP", "JU": "ECA Jura",
+}
+PRIVATE_BUILDING_INSURANCE_CANTONS = ("GE", "UR", "SZ", "TI", "AI", "VS", "OW")
+
+# ---------------------------------------------------------------------------
 # Federal building register (GWR) codes
 # ---------------------------------------------------------------------------
 GWR_ENERGY_SOURCE = {

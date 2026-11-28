@@ -171,7 +171,14 @@ def _location_from_attrs(a: dict, note: str) -> dict:
         "egid": int(egid) if egid and egid.isdigit() else None,
         "feature_id": feature_id or None,
         "source": "geo.admin.ch address search", "match_note": note,
+        "canton": canton_from_detail(a.get("detail", "")),
     }
+
+
+def canton_from_detail(detail: str) -> str | None:
+    """The address search ends its 'detail' text with the canton, e.g. '... ch be' -> 'BE'."""
+    m = re.search(r"\bch ([a-z]{2})\s*$", detail or "")
+    return m.group(1).upper() if m else None
 
 
 def geocode(address: str) -> dict | None:
